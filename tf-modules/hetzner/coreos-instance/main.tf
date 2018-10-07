@@ -1,3 +1,5 @@
+# Copyright 2018 Google LLC.
+# SPDX-License-Identifier: Apache-2.0
 # heavy lifting from
 # https://gist.github.com/thetechnick/12b33e4edfc96e4ccc9800afef2be7c5
 
