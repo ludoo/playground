@@ -1,0 +1,13 @@
+#cloud-config
+
+# ipv4 address: ${ipv4_address}
+
+hostname: ${name}
+
+ssh_authorized_keys:
+  - ${ssh_key}
+
+# for k8s networking
+bootcmd:
+  - sysctl net.bridge.bridge-nf-call-iptables=1
+  - if ! grep -q '${name}' /etc/hosts; then echo ${ipv4_address} ${name} | sudo tee -a /etc/hosts; fi
