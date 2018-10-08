@@ -8,7 +8,7 @@ data "template_file" "cloud-config" {
 
   vars = {
     name         = "${var.name}"
-    ssh_key      = "${var.ssh_public_key}"
+    ssh_key      = "${file(var.ssh_public_key_file)}"
     ipv4_address = "${hcloud_server.server.ipv4_address}"
   }
 }

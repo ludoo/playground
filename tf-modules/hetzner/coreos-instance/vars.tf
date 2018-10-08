@@ -9,7 +9,7 @@ variable "ssh_public_key_id" {
   description = "ID of the SSH public key on Hetzner Cloud."
 }
 
-variable "ssh_public_key" {
+variable "ssh_public_key_file" {
   description = "Actual SSH public key matching the id on Hetzner Cloud"
 }
 
