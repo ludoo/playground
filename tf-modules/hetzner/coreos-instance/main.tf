@@ -49,8 +49,13 @@ resource "null_resource" "setup" {
     script = "${path.module}/${var.source_image == "" ? "install-from-scratch" : "install-from-image"}.sh"
   }
 
-  # TODO: only reboot for image installs
   provisioner "local-exec" {
-    command = "ssh -o 'StrictHostKeyChecking no' -i ${var.ssh_private_key_file} core@${element(hcloud_server.server.*.ipv4_address, count.index)} 'sudo bash -c \"(sleep 3 && reboot)&\"'"
+    command = <<EOF
+    ${
+      var.source_image == ""
+      ? "/bin/true"
+      : "ssh -o 'StrictHostKeyChecking no' -i ${var.ssh_private_key_file} core@${element(hcloud_server.server.*.ipv4_address, count.index)} 'sudo bash -c \"(sleep 3 && reboot)&\"'"
+    }
+    EOF
   }
 }
