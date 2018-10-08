@@ -12,5 +12,5 @@ resource "null_resource" "server-list" {
 }
 
 output "servers" {
-  value = ["${null_resource.server-list.triggers}"]
+  value = ["${null_resource.server-list.*.triggers}"]
 }
