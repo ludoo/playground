@@ -7,7 +7,17 @@ hostname: ${name}
 ssh_authorized_keys:
   - ${ssh_key}
 
-# for k8s networking
-bootcmd:
-  - sysctl net.bridge.bridge-nf-call-iptables=1
-  - if ! grep -q '${name}' /etc/hosts; then echo ${ipv4_address} ${name} | sudo tee -a /etc/hosts; fi
+coreos:
+  units:
+    - name: fix-hosts.service
+      runtime: true
+      command: start
+      content: |
+        [Service]
+        ExecStart=/bin/bash -c "if ! grep -q '${name}' /etc/hosts; then echo ${ipv4_address} ${name} | tee -a /etc/hosts; fi"
+    - name: fix-net-bridge.service
+      runtime: true
+      command: start
+      content: |
+        [Service]
+        ExecStart=/bin/bash -c "modprobe br_netfilter && sysctl net.bridge.bridge-nf-call-iptables=1"
