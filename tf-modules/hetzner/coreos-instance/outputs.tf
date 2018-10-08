@@ -1,16 +1,18 @@
 # Copyright 2018 Google LLC.
 # SPDX-License-Identifier: Apache-2.0
 
-resource "null_resource" "server-list" {
-  count = "${length(var.num_instances)}"
-
-  triggers {
-    id           = "${element(hcloud_server.server.*.id, count.index)}"
-    name         = "${element(hcloud_server.server.*.name, count.index)}"
-    ipv4_address = "${element(hcloud_server.server.*.ipv4_address, count.index)}"
-  }
+output "instances" {
+  value = ["${formatlist("id: %s, name: %s, ip: %s", hcloud_server.server.*.id, hcloud_server.server.*.name, hcloud_server.server.*.ipv4_address)}"]
 }
 
-output "servers" {
-  value = ["${null_resource.server-list.*.triggers}"]
+output "ids" {
+  value = ["${hcloud_server.server.*.id}"]
+}
+
+output "names" {
+  value = ["${hcloud_server.server.*.name}"]
+}
+
+output "ipv4_addresses" {
+  value = ["${hcloud_server.server.*.ipv4_address}"]
 }
