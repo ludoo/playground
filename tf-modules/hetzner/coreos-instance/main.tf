@@ -25,12 +25,11 @@ resource "hcloud_server" "server" {
   rescue      = "${var.source_image == "" ? "linux64" : ""}"
 }
 
-resource "null_resource" "coreos-install-from-scratch" {
-  count      = "${var.source_image == "" ? var.num_instances : 0}"
-  depends_on = ["hcloud_server.server"]
+resource "null_resource" "setup" {
+  count = "${var.num_instances}"
 
   triggers {
-    server_ip = "${element(hcloud_server.server.*.ipv4_address, count.index)}"
+    ipv4_address = "${ hcloud_server.server.*.ipv4_address[count.index] }"
   }
 
   connection {
@@ -38,43 +37,19 @@ resource "null_resource" "coreos-install-from-scratch" {
     timeout     = "2m"
     agent       = false
     private_key = "${file(var.ssh_private_key_file)}"
+    user        = "${var.source_image == "" ? "root" : "core"}"
   }
 
   provisioner "file" {
     content     = "${element(data.template_file.cloud-config.*.rendered, count.index)}"
-    destination = "/root/cloud-config.yaml"
+    destination = "/${var.source_image == "" ? "root" : "home/core"}/cloud-config.yaml"
   }
 
   provisioner "remote-exec" {
-    script = "${path.module}/install-from-scratch.sh"
-  }
-}
-
-resource "null_resource" "coreos-install-from-image" {
-  count      = "${var.source_image == "" ? 0 : var.num_instances}"
-  depends_on = ["hcloud_server.server"]
-
-  triggers {
-    server_ip = "${element(hcloud_server.server.*.ipv4_address, count.index)}"
+    script = "${path.module}/${var.source_image == "" ? "install-from-scratch" : "install-from-image"}.sh"
   }
 
-  connection {
-    host        = "${element(hcloud_server.server.*.ipv4_address, count.index)}"
-    timeout     = "2m"
-    agent       = false
-    private_key = "${file(var.ssh_private_key_file)}"
-    user        = "core"
-  }
-
-  provisioner "file" {
-    content     = "${element(data.template_file.cloud-config.*.rendered, count.index)}"
-    destination = "/home/core/cloud-config.yaml"
-  }
-
-  provisioner "remote-exec" {
-    script = "${path.module}/install-from-image.sh"
-  }
-
+  # TODO: only reboot for image installs
   provisioner "local-exec" {
     command = "ssh -o 'StrictHostKeyChecking no' -i ${var.ssh_private_key_file} core@${element(hcloud_server.server.*.ipv4_address, count.index)} 'sudo bash -c \"(sleep 3 && reboot)&\"'"
   }

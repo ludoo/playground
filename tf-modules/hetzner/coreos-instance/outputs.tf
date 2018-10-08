@@ -13,6 +13,11 @@ output "names" {
   value = ["${hcloud_server.server.*.name}"]
 }
 
+data "template_file" "trigger" {
+  count    = "${length(var.num_instances)}"
+  template = "${lookup(null_resource.setup.*.triggers[count.index], "ipv4_address")}"
+}
+
 output "ipv4_addresses" {
-  value = ["${hcloud_server.server.*.ipv4_address}"]
+  value = ["${data.template_file.trigger.*.rendered}"]
 }
