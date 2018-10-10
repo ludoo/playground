@@ -16,4 +16,5 @@ coreos:
         [Service]
         Type=oneshot
         ExecStart=/bin/bash -c "if ! grep -q '${name}' /etc/hosts; then echo ${ipv4_address} ${name} | tee -a /etc/hosts; fi"
+        ExecStart=/bin/bash -c "modprobe ip_vs ip_vs_rr ip_vs_sh ip_vs_wrr"
         ExecStart=/bin/bash -c "modprobe br_netfilter && sysctl net.bridge.bridge-nf-call-iptables=1"
