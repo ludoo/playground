@@ -14,7 +14,7 @@ output "names" {
 }
 
 data "template_file" "trigger" {
-  count    = "${length(var.num_instances)}"
+  count    = "${var.num_instances}"
   template = "${lookup(null_resource.setup.*.triggers[count.index], "ipv4_address")}"
 }
 
