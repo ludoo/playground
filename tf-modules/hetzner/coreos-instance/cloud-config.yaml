@@ -9,15 +9,11 @@ ssh_authorized_keys:
 
 coreos:
   units:
-    - name: fix-hosts.service
+    - name: local-config.service
       runtime: true
       command: start
       content: |
         [Service]
+        Type=oneshot
         ExecStart=/bin/bash -c "if ! grep -q '${name}' /etc/hosts; then echo ${ipv4_address} ${name} | tee -a /etc/hosts; fi"
-    - name: fix-net-bridge.service
-      runtime: true
-      command: start
-      content: |
-        [Service]
         ExecStart=/bin/bash -c "modprobe br_netfilter && sysctl net.bridge.bridge-nf-call-iptables=1"
